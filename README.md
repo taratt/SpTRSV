@@ -16,3 +16,5 @@ Next run:
 
 ```
 ./main pathToMatrix pathToRightVector
+
+Note that the matrix and the vector have to be sparse .mtx files.
