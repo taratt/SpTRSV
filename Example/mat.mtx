@@ -1,0 +1,20 @@
+%-------------------------------------------------------------------------------\
+% UF Sparse Matrix Collection, Tim Davis\
+% http://www.cise.ufl.edu/research/sparse/matrices/Norris/torso1\
+% name: Norris/torso1\
+% [S.Norris, Univ Auckland. finite diff/boundary elem,  2D model of torso]\
+% id: 896\
+% date: 2003\
+% author: S. Norris\
+% ed: T. Davis\
+% fields: title A name id date author ed kind\
+% kind: 2D/3D problem\
+%-------------------------------------------------------------------------------\
+5 5 7
+1 1 1
+3 1 2
+4 1 4
+5 1 1
+4 4 2
+5 4 3
+5 5 1
