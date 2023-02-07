@@ -114,7 +114,7 @@ Graph create_dependency_graph(CSC matrix){
 }
 
 /**
- * Calculated the columns that take part in the triangular solve algorithm
+ * Calculates the columns that take part in the triangular solve algorithm
  *
  * @param matrix The CSC format of the matrix
  * @param x The right hand side vector of the system
@@ -135,19 +135,28 @@ set <int> get_reach(CSC matrix, Vector_b x){
     return mattered_columns;
 }
 
+/**
+ * Calculates the levels that contain column numbers that can be computed in parallel int triangular solve algorithm
+ *
+ * @param matrix The CSC format of the matrix
+ * @param x The right hand side vector of the system
+ * @return a vetor of vectors with each element being a level that contains column numbers in that level
+ */
 vector<vector <int>> create_levels(CSC matrix, Vector_b x){
     set <int> reached_columns = get_reach(matrix, x);
     Graph graph = create_dependency_graph(matrix);
     set<int >::iterator reach_it ;
     int * levels = new int [matrix.dim]();
     vector<int> reached_vec (reached_columns.begin(), reached_columns.end());
+    //Looping over columns that take part in the calculations
     for (reach_it = reached_columns.begin() ; reach_it != reached_columns.end() ; reach_it++ ){
         int j = *reach_it;
         for (auto ed : make_iterator_range(boost::out_edges(j, graph))){
+            //The level of a column is either already higher than its dependency or changes into one level higher than it
             levels[ed.m_target] = max(levels[j]+1, levels[ed.m_target]);
         }
     }
-
+//Changing calculated levels to a vector of vectors for easier further calculations
     vector<vector<int>> partitions;
     partitions.emplace_back();
     for(int i=0; i<reached_columns.size(); i++){
@@ -160,19 +169,31 @@ vector<vector <int>> create_levels(CSC matrix, Vector_b x){
     return (partitions);
 }
 
+/**
+ * Calculates the number of columns in a matrix that each column (that is relevant to the algorithm) depends on
+ *
+ * @param matrix The CSC format of the matrix
+ * @param x The right hand side vector of the system
+ * @param reached_columns A set of reached columns that is calculated in the function
+ * @param dependency_nums An array that saves the number of columns each column depends on. This array is filled in this function.
+
+ */
 void get_dependencies(CSC matrix, Vector_b x,set <int> &reached_columns, int * &dependency_nums){
     Graph graph = create_dependency_graph(matrix);
     vector<set<int>> dependency_items;
     reached_columns = get_reach(matrix,x);
+    //Calculating the relevant columns
     vector<int> reached_vec (reached_columns.begin(), reached_columns.end());
 
     for (int i = 0; i < matrix.dim; ++i) {
         dependency_items.emplace_back();
     }
+    //Iterating starting from nonzero rows of the right hand size vector
     for (int i=0 ;i<x.nonzeros ; i++){
-
+        //Calculating dependencies on paths of the graph that starts from this row
         visit_dependencies_iterative(dependency_items, x.nonzero_rows[i],graph);
     }
+    //Calculating the number of each columns dependencies
     for (int i = 0; i < reached_columns.size(); ++i) {
         dependency_nums[reached_vec[i]] = dependency_items[reached_vec[i]].size();
     }

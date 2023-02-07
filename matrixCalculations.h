@@ -38,6 +38,7 @@ int lsolve (int n, size_t * Lp, int* Li, long double* Lx,long double *x){
     for (j = 0; j<n; j++){
         x[j] /= Lx[Lp[j]];
         for (p = Lp[j]+1; p<Lp[j+1]; p++) {
+            //avoiding precision overflowing
             if (!(abs(Lx[p])<pow(10,-5) || abs(x[j])<pow(10,-5)))
                 x[Li[p]] -= Lx[p] * x[j];
         }
@@ -77,6 +78,7 @@ int optimized_single_lsolve (CSC L, Vector_b x){
         int j = *it;
         x.val[j] /= L.val[L.col_ptr[j]];
         for (p = L.col_ptr[j]+1; p<L.col_ptr[j+1]; p++) {
+            //avoiding precision overflowing
             if (!(abs(L.val[p])<pow(10,-5) || abs(x.val[j])<pow(10,-5)))
                 x.val[L.row_ind[p]] -= L.val[p] * x.val[j];
         }
@@ -124,6 +126,7 @@ int parallel_lsolve_level_scheduling(CSC L, Vector_b x){
             int k = levels[i][it];
             x.val[k] /= L.val[L.col_ptr[k]];
             for (int p = L.col_ptr[k]+1; p<L.col_ptr[k+1]; p++) {
+                //avoiding precision overflowing
                 if (!(abs(L.val[p]) < pow(10, -5) || abs(x.val[k]) < pow(10, -5))) {
                     long double calculated_val = L.val[p] * x.val[k];
 #pragma omp atomic //Much lower overhead than the critical operation
@@ -177,6 +180,7 @@ int parallel_lsolve_self_scheduling(CSC L, Vector_b x){
         x.val[col] /= L.val[L.col_ptr[col]];
         for (int p = L.col_ptr[col]+1; p<L.col_ptr[col+1]; p++) {
             long double calculated = 0;
+            //avoiding precision overflowing
             if (!(abs(L.val[p]) < pow(10, -6) || abs(x.val[col]) < pow(10, -6))) {
                 calculated = L.val[p] * x.val[col];
             }
@@ -220,6 +224,7 @@ int spmv_csc(int n, size_t * Ap,int * Ai, long double* Ax, long double* x, long 
     if (!Ap || !x || !y) return (0); //Checking inputs
     for (j = 0; j<n; j++){
         for (p = Ap[j]; p<Ap[j+1]; p++){
+            //avoiding precision overflowing
             if (!(abs(Ax[p])<pow(10,-5) || abs(x[j])<pow(10,-5)))
                 y[Ai[p]] += Ax[p]*x[j];
         }
